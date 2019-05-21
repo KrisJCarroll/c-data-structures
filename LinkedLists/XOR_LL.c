@@ -11,10 +11,16 @@ struct Node* XOR (struct Node* prev, struct Node* next) {
     return (struct Node*) ((uintptr_t) (prev) ^ (uintptr_t) (next));
 }
 
-void insert(struct Node** head_ref, int data) {
-    struct Node *new_node = (struct Node*) malloc (sizeof (struct Node));
+void insert(struct Node** head, int data) {
+    struct Node* new_node = (struct Node*) malloc (sizeof (struct Node));
     new_node->data = data;
-    new_node->xor = XOR (*head_ref, NULL);
+    new_node->xor = XOR (NULL, *head);
+
+    if(*head != NULL) {
+        struct Node* next = XOR(NULL, (*head)->xor);
+        (*head)->xor = XOR(next, new_node);
+    }
+    *head = new_node;
 }
 
 void print_list (struct Node* head) {
