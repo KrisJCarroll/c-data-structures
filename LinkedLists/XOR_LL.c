@@ -31,19 +31,64 @@ void insert(struct Node** head, int data) {
     }
     *head = new_node;
 }
+
+void delete(struct Node** head, int data) {
+    struct Node* curr = *head;
+    struct Node* prev = NULL;
+    struct Node* temp = NULL;
+
+    while (curr != NULL && curr->data != data) {
+        temp = curr;
+        curr = XOR(prev, curr->xor);
+        prev = temp;
+    }
+
+    if(!curr) {
+        printf("Element not found.");
+        return;
+    }
+
+    if(prev) {
+        prev->xor = XOR(XOR(prev->xor, curr), XOR(prev, curr->xor));
+        temp = XOR(curr->xor, prev);
+    }
+
+    if(temp) {
+        temp->xor = XOR( XOR(temp->xor, curr), prev);
+    }
+
+    if(!prev) {
+        *head = curr->xor;
+    }
+    free(curr);
+
+}
+
+void append(struct Node** tail, int data) {
+    struct Node* new_node = (struct Node*) malloc (sizeof (struct Node));
+    new_node->data = data;
+    new_node->xor = XOR(*tail, NULL);
+
+    if (*tail != NULL) {
+        struct Node* prev = XOR((*tail)->xor, NULL);
+        (*tail)->xor = XOR(new_node, prev);
+    }
+}
 // traverses the LL and prints data for each followed by a space
 void print_list (struct Node* head) {
     struct Node* curr = head;
     struct Node* prev = NULL;
     struct Node* next;
 
-    while (curr != NULL) {
+    while (curr) {
         printf("%d ", curr->data);
         next = XOR(prev, curr->xor); // need to calculate next by XOR'ing between the previous and our current XOR'ed value
         prev = curr;
         curr = next;
     }
+    printf("\n");
 }
+
 
 int main() {
     struct Node* head = NULL;
@@ -52,5 +97,22 @@ int main() {
     insert(&head, 30);
     insert(&head, 40);
     print_list(head);
+    delete(&head, 30);
+    print_list(head);
+    
+    struct Node* tail = NULL;
+    insert(&tail, 40);
+    insert(&tail, 30);
+    insert(&tail, 20);
+    insert(&tail, 10);
+    // Will always print in the direction leading away from the Node you provide if that node is NULL
+    print_list(tail);
+
+    append(&tail, 40);
+    append(&tail, 30);
+    append(&tail, 20);
+    append(&tail, 10);
+    print_list(tail);
+
     return (0);
 }
